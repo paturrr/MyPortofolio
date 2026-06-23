@@ -609,6 +609,42 @@
     footer { flex-direction:column; gap:.8rem; }
     .edu-card { grid-template-columns:90px 1fr; gap:1.2rem; padding:1.5rem 1.5rem 1.5rem 2rem; }
   }
+
+  /* ─── SHIMMER EFFECT ─── */
+  .img-loading-wrap {
+    position: relative;
+    background: #060d1e;
+    overflow: hidden;
+  }
+  .img-loading-wrap::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      rgba(77, 159, 255, 0.08),
+      transparent
+    );
+    transform: translateX(-100%);
+    animation: shimmer 1.6s infinite;
+    z-index: 1;
+  }
+  @keyframes shimmer {
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  .img-loaded::before {
+    display: none;
+  }
+  .fade-in-img {
+    opacity: 0;
+    transition: opacity 0.4s ease-in-out;
+  }
+  .fade-in-img.loaded {
+    opacity: 1;
+  }
   </style>
 </head>
 <body>
@@ -1283,8 +1319,17 @@
       const item = document.createElement('div');
       item.className = `carousel-item${idx === 0 ? ' active' : ''}`;
 
+      const wrap = document.createElement('div');
+      wrap.className = 'img-loading-wrap';
+      wrap.style.borderRadius = '12px';
+      wrap.style.maxHeight = '70vh';
+      wrap.style.width = '100%';
+      wrap.style.display = 'flex';
+      wrap.style.justifyContent = 'center';
+      wrap.style.background = '#060d1e';
+
       const img = document.createElement('img');
-      img.className = 'd-block w-100';
+      img.className = 'd-block w-100 fade-in-img';
       img.src = src.trim();
       img.alt = `Project image ${idx + 1}`;
       img.style.borderRadius = '12px';
@@ -1293,7 +1338,13 @@
       img.loading = 'lazy';
       img.decoding = 'async';
 
-      item.appendChild(img);
+      img.onload = () => {
+        img.classList.add('loaded');
+        wrap.classList.add('img-loaded');
+      };
+
+      wrap.appendChild(img);
+      item.appendChild(wrap);
       workCarouselInner.appendChild(item);
     });
   };
@@ -1338,8 +1389,17 @@
       const item = document.createElement('div');
       item.className = `carousel-item${idx === 0 ? ' active' : ''}`;
 
+      const wrap = document.createElement('div');
+      wrap.className = 'img-loading-wrap';
+      wrap.style.borderRadius = '12px';
+      wrap.style.maxHeight = '70vh';
+      wrap.style.width = '100%';
+      wrap.style.display = 'flex';
+      wrap.style.justifyContent = 'center';
+      wrap.style.background = '#060d1e';
+
       const img = document.createElement('img');
-      img.className = 'd-block w-100';
+      img.className = 'd-block w-100 fade-in-img';
       img.src = src.trim();
       img.alt = `Certificate image ${idx + 1}`;
       img.style.borderRadius = '12px';
@@ -1348,7 +1408,13 @@
       img.loading = 'lazy';
       img.decoding = 'async';
 
-      item.appendChild(img);
+      img.onload = () => {
+        img.classList.add('loaded');
+        wrap.classList.add('img-loaded');
+      };
+
+      wrap.appendChild(img);
+      item.appendChild(wrap);
       certCarouselInner.appendChild(item);
     });
   };
@@ -1365,6 +1431,23 @@
       renderCertCarousel(images.length ? images : ['/Images/Tourrr2.png']);
       certModal.show();
     });
+  });
+
+  // Set up skeleton load for static images
+  document.querySelectorAll('.wk-img, .photo-frame, .c-photo').forEach(wrap => {
+    const img = wrap.querySelector('img');
+    if (!img) return;
+    wrap.classList.add('img-loading-wrap');
+    img.classList.add('fade-in-img');
+    const onLoaded = () => {
+      img.classList.add('loaded');
+      wrap.classList.add('img-loaded');
+    };
+    if (img.complete) {
+      onLoaded();
+    } else {
+      img.addEventListener('load', onLoaded);
+    }
   });
 </script>
 
